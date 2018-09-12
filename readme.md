@@ -1,65 +1,204 @@
-<p align="center"><img src="https://laravel.com/assets/img/components/logo-laravel.svg"></p>
+## Методы API
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/d/total.svg" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/v/stable.svg" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
-</p>
 
-## About Laravel
+GET _{host}/api/get-city-list_
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel attempts to take the pain out of development by easing common tasks used in the majority of web projects, such as:
+Вернёт ОК или ошибку
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+`Запишет в базу список всех городов`
 
-Laravel is accessible, yet powerful, providing tools needed for large, robust applications.
 
-## Learning Laravel
+POST _{host}/api/get-code_
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of any modern web application framework, making it a breeze to get started learning the framework.
+`Вернёт код города из базы, код соответствует ID города в сервисе Киноход`
 
-If you're not in the mood to read, [Laracasts](https://laracasts.com) contains over 1100 video tutorials on a range of topics including Laravel, modern PHP, unit testing, JavaScript, and more. Boost the skill level of yourself and your entire team by digging into our comprehensive video library.
+тело запроса:
 
-## Laravel Sponsors
+```json
+{
+	"name": "Санкт-Петербург"
+}
+```
 
-We would like to extend our thanks to the following sponsors for helping fund on-going Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell):
+Результат: 
+```json
+{
+    "code": 2
+}
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[British Software Development](https://www.britishsoftware.co)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- [UserInsights](https://userinsights.com)
-- [Fragrantica](https://www.fragrantica.com)
-- [SOFTonSOFA](https://softonsofa.com/)
-- [User10](https://user10.com)
-- [Soumettre.fr](https://soumettre.fr/)
-- [CodeBrisk](https://codebrisk.com)
-- [1Forge](https://1forge.com)
-- [TECPRESSO](https://tecpresso.co.jp/)
-- [Runtime Converter](http://runtimeconverter.com/)
-- [WebL'Agence](https://weblagence.com/)
-- [Invoice Ninja](https://www.invoiceninja.com)
-- [iMi digital](https://www.imi-digital.de/)
-- [Earthlink](https://www.earthlink.ro/)
-- [Steadfast Collective](https://steadfastcollective.com/)
+GET _{host}/api/get-movie-list/{code}
 
-## Contributing
+`Вернёт список фильмов по коду города`
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Обязательный параметр **{code}** - это код города из сервиса Киноход
 
-## Security Vulnerabilities
+Результат:
+```json
+[  
+   {  
+      "id":17676,
+      "originalTitle":"The Predator",
+      "annotationFull":"Экипаж корабля экстренно высаживается в джунглях, где обитает некая тварь, о которой не говорят вслух. Люди начинают исчезать один за другим, и их тела с содранной кожей находят на деревьях. Только когда по счастливой случайности одна из жертв хищника выживает, становится понятно, что положение оставшихся в живых не просто ужасное — оно безнадежное.",
+      "genres":[  
+         {  
+            "name":"ужасы",
+            "id":17
+         },
+         {  
+            "name":"экшен",
+            "id":7
+         }
+      ],
+      "countries":[  
+         "США"
+      ],
+      "productionYear":2018,
+      "title":"Хищник",
+      "ageRestriction":"18+",
+      "annotationShort":"Ужасы. Экипаж корабля экстренно высаживается в джунглях, где обитает жуткая тварь.",
+      "poster":{  
+         "rgb":"d96633",
+         "name":"b9ed7923-7269-4de8-b9ce-264e076971ef.jpg"
+      }
+   },
+   {  
+      "id":12096,
+      "originalTitle":"Счастья! Здоровья!",
+      "annotationFull":"Три истории любви: три свадьбы, три разные культурные традиции. Герои русской новеллы знают, что именно их свадьба должна быть самой лучшей, а свадебный ролик — самым красивым. Но подруги успевают наговорить лишнего, родители абсолютно не готовы к празднику, а яркое прошлое молодоженов может сорвать церемонию. Вторая история случается с двумя татарскими семьями, для которых свадьба собственных детей оказывается абсолютной неожиданностью, а обстоятельства, толкнувшие ребят на этот шаг, остаются для них загадкой. Героиня нашей третьей истории — коренная москвичка, а ее жених — ассимилированный армянин, выросший в столице. Хотят герои того или нет, но свадьба должна пройти при соблюдении всех традиций, которые молодоженам, конечно же, неизвестны. Всем трём парам хочется пожелать счастья и здоровья – ведь любовь у них уже есть!",
+      "genres":[  
+         {  
+            "name":"комедия",
+            "id":2
+         }
+      ],
+      "countries":[  
+         "Россия"
+      ],
+      "productionYear":2017,
+      "title":"Счастья! Здоровья!",
+      "ageRestriction":"16+",
+      "annotationShort":"Комедия. Три истории любви: три свадьбы, три разные культурные традиции.",
+      "poster":{  
+         "rgb":"807e79",
+         "name":"8334f41c-7d2a-4a76-a4a8-98bd4ebe8d86.jpg"
+      }
+   }
+]
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+GET _{host}/api/get-movie-detail/{id}
 
-## License
+`Вернёт подробную информацию о фильме по его Id`
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Обязательный параметр **{Id}** - это Id фильма сервиса Киноход
+
+Результат:
+```json
+{
+   "_id":"5b97ba879b27090b274ffe7f",
+   "originalTitle":"The Predator",
+   "annotationFull":"Экипаж корабля экстренно высаживается в джунглях, где обитает некая тварь, о которой не говорят вслух. Люди начинают исчезать один за другим, и их тела с содранной кожей находят на деревьях. Только когда по счастливой случайности одна из жертв хищника выживает, становится понятно, что положение оставшихся в живых не просто ужасное — оно безнадежное.",
+   "genres":[
+      {
+         "name":"ужасы",
+         "id":17
+      },
+      {
+         "name":"экшен",
+         "id":7
+      }
+   ],
+   "id":17676,
+   "countries":[
+      "США"
+   ],
+   "productionYear":2018,
+   "title":"Хищник",
+   "ageRestriction":"18+",
+   "annotationShort":"Ужасы. Экипаж корабля экстренно высаживается в джунглях, где обитает жуткая тварь.",
+   "poster":{
+      "rgb":"d96633",
+      "name":"b9ed7923-7269-4de8-b9ce-264e076971ef.jpg"
+   },
+   "trailers":[
+      {
+         "source":{
+            "filename":"dad85cc0-5c94-465a-8736-56bdbadc168f.qt",
+            "duration":102.03,
+            "contentType":"video/quicktime"
+         },
+         "videos":[
+            {
+               "filename":"dad85cc0-5c94-465a-8736-56bdbadc168f_mobile_mp4.mp4",
+               "duration":102.03,
+               "contentType":"video/quicktime"
+            }
+         ],
+         "preview":{
+            "rgb":"070a0a",
+            "name":"7ef42c20-b452-4341-8d36-89faf7804459.jpg"
+         }
+      }
+   ],
+   "premiereDateWorld":"2018-09-13",
+   "imdbId":"3829266",
+   "directors":[
+      {
+         "name":"Шейн Блэк",
+         "id":1581
+      }
+   ],
+   "duration":105,
+   "updated_at":"2018-09-11 12:52:23",
+   "created_at":"2018-09-11 12:52:23"
+}
+```
+
+GET _{host}/api/get-seances/{code}/{movieId}
+
+`Вернёт все сеансы в городе по обпределённому фильму`
+
+Обязательный параметр **{code}** - это код города из сервиса Киноход
+Обязательный параметр **{movieId}** - это id фильма сервиса Киноход
+
+Результат:
+```json
+[
+   {
+      "id":"77393033",
+      "hallId":4499,
+      "startTime":"2018-09-17 00:20:00+03",
+      "languageId":null,
+      "subtitleId":null,
+      "groupName":"Сеансы 3D",
+      "time":"00:20",
+      "formats":[
+         "3d"
+      ],
+      "minPrice":400,
+      "maxPrice":400,
+      "date":"2018-09-16",
+      "cinemaId":225
+   },
+   {
+      "id":"77385081",
+      "hallId":4525,
+      "startTime":"2018-09-17 00:20:00+03",
+      "languageId":null,
+      "subtitleId":null,
+      "groupName":"Обычные сеансы 2D",
+      "time":"00:20",
+      "formats":[
+         "2d"
+      ],
+      "minPrice":360,
+      "maxPrice":360,
+      "date":"2018-09-16",
+      "cinemaId":223
+   }
+]
+```
+
+
+
