@@ -1,3 +1,14 @@
+## Порядок деплоя
+
+**_git clone git@github.com:MrDreek/kinohod-api.git_**
+
+**_composer install --no-dev_** установка зависимостей без require-dev
+
+Указать необходимоые данные в файле .env (Подключение к базе, настройки прокси, ключ кинохода)
+
+_**php artisan config:cache**_  // команда для кеширования настроек окружения
+
+
 ## Методы API
 
 
