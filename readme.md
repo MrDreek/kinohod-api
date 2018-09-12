@@ -2,6 +2,10 @@
 
 **_git clone git@github.com:MrDreek/kinohod-api.git_**
 
+**_php -r "file_exists('.env') || copy('.env.example', '.env');"_**
+
+**_php artisan key:generate_**
+
 **_composer install --no-dev_** установка зависимостей без require-dev
 
 Указать необходимоые данные в файле .env (Подключение к базе, настройки прокси, ключ кинохода)
