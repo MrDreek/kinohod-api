@@ -32,9 +32,9 @@ class Api extends Controller
 
         City::truncate();
 
-        foreach (json_decode(gzdecode($response->get())) as $city) {
+        foreach (json_decode(gzdecode($response->get())) as $cityObj) {
             $city = new City;
-            foreach ($city as $key => $item) {
+            foreach ($cityObj as $key => $item) {
                 $city->{$key} = $item;
             }
             $city->save();
