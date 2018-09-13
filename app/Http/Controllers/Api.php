@@ -199,9 +199,9 @@ class Api extends Controller
 
         Cinema::truncate();
 
-        foreach (json_decode(gzdecode($response->content)) as $cinema) {
+        foreach (json_decode(gzdecode($response->content)) as $cinemaObj) {
             $cinema = new Cinema;
-            foreach ($cinema as $key => $item) {
+            foreach ($cinemaObj as $key => $item) {
                 $cinema->{$key} = $item;
             }
             $cinema->save();
