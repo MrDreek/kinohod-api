@@ -45,16 +45,34 @@ POST _{host}/api/get-code_
 Запрос без параметров:
 ```json
 {
-    "error": 400,
-    "message": "name is required params"
+    "error": {
+        "movieId": "Требуется указать id фильма"
+    }
 }
 ```
 
-GET _{host}/api/get-movie-list/{code}
+Запрос со строкой:
+```json
+{
+    "error": {
+        "movieId": "id фильма должен быть числом"
+    }
+}
+```
+
+POST _{host}/api/get-movie-list
 
 `Вернёт список фильмов по коду города`
 
 Обязательный параметр **{code}** - это код города из сервиса Киноход
+
+тело запроса:
+
+```json
+{
+	"code": 2
+}
+```
 
 Результат:
 ```json
@@ -112,7 +130,25 @@ GET _{host}/api/get-movie-list/{code}
 ]
 ```
 
-POST _{host}/api/get-movie-detail/{id}
+Запрос без параметров:
+```json
+{
+    "error": {
+        "code": "Требуется указать код города"
+    }
+}
+```
+
+Запрос со строкой:
+```json
+{
+    "error": {
+        "code": "Код должен быть числом"
+    }
+}
+```
+
+POST _{host}/api/get-movie-detail
 
 `Вернёт подробную информацию о фильме по его Id`
 
@@ -187,7 +223,25 @@ POST _{host}/api/get-movie-detail/{id}
 }
 ```
 
-POST _{host}/api/get-seances/{code}/{movieId}
+Запрос без параметров:
+```json
+{
+    "error": {
+        "movieId": "Требуется указать id фильма"
+    }
+}
+```
+
+Запрос со строкой:
+```json
+{
+    "error": {
+        "movieId": "id фильма должен быть числом"
+    }
+}
+```
+
+POST _{host}/api/get-seances
 
 `Вернёт все сеансы в городе по обпределённому фильму`
 
@@ -238,4 +292,23 @@ POST _{host}/api/get-seances/{code}/{movieId}
       "cinemaId":223
    }
 ]
+```
+
+Запрос без параметров:
+```json
+{
+    "error": {
+        "code": "Требуется указать код города",
+        "movieId": "Требуется указать id фильма"
+    }
+}
+```
+
+Запрос со строкой:
+```json
+{
+    "error": {
+        "code": "Код должен быть числом"
+    }
+}
 ```

@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Cinema;
 use App\City;
 use App\Movie;
+use App\Http\Requests\CodeRequest;
+use App\Http\Requests\MovieIdReques;
+use App\Http\Requests\NameRequest;
+use App\Http\Requests\SeanceRequest;
 use Illuminate\Routing\Controller;
 use Ixudra\Curl\Facades\Curl;
-use Illuminate\Http\Request;
 
 class Api extends Controller
 {
@@ -47,15 +51,11 @@ class Api extends Controller
 
     /**
      * Метод возвращает код города из нашей базы который соответствует коду из сервиса kinohod
-     * @param Request $request
+     * @param NameRequest $request
      * @return array
      */
-    public function getCode(Request $request)
+    public function getCode(NameRequest $request)
     {
-        if ($request->name === null) {
-            return response()->json(['error' => 400, 'message' => 'name is required params'], 400);
-        }
-
         $city = City::where('title', 'like', '%' . $request->name . '%')->first();
 
         if ($city === null) {
@@ -66,7 +66,7 @@ class Api extends Controller
     }
 
     /**
-     * Метод подтягивает список городов и перезаписывает их в базу
+     * Метод подтягивает список фильмов и перезаписывает их в базу
      * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
      */
     public function getMovieList()
@@ -89,21 +89,9 @@ class Api extends Controller
 
         foreach ($moviesJson as $moviesObj) {
             $movie = new Movie;
-            $movie->originalTitle = $moviesObj->originalTitle;
-            $movie->annotationFull = $moviesObj->annotationFull;
-            $movie->genres = $moviesObj->genres;
-            $movie->id = $moviesObj->id;
-            $movie->countries = $moviesObj->countries;
-            $movie->productionYear = $moviesObj->productionYear;
-            $movie->title = $moviesObj->title;
-            $movie->ageRestriction = $moviesObj->ageRestriction;
-            $movie->annotationShort = $moviesObj->annotationShort;
-            $movie->poster = $moviesObj->poster;
-            $movie->trailers = $moviesObj->trailers;
-            $movie->premiereDateWorld = $moviesObj->premiereDateWorld;
-            $movie->imdbId = $moviesObj->imdbId;
-            $movie->directors = $moviesObj->directors;
-            $movie->duration = $moviesObj->duration;
+            foreach ($moviesObj as $key => $item) {
+                $movie->{$key} = $moviesObj->{$key};
+            }
             $movie->save();
         }
 
@@ -112,16 +100,13 @@ class Api extends Controller
 
     /**
      * Метод возвращает список фильмов с краткой ифнормацие по коду города
-     * @param Request $request
+     * @param CodeRequest $request
      * @return array
      */
-    public function getMovieListByCode(Request $request)
+    public function getMovieListByCode(CodeRequest $request)
     {
         $key = config('app.key_kinohod');
 
-        if ($request->code === null) {
-            return response()->json(['error' => 400, 'message' => 'code is required params'], 400);
-        }
         $url = "https://api.kinohod.ru/api/data/2/$key/city/" . $request->code . '/running/week.json';
 
         $response = Curl::to($url);
@@ -162,15 +147,11 @@ class Api extends Controller
 
     /**
      * Метод возвращает детальную информацию по id фильма | не используется
-     * @param Request $request
+     * @param MovieIdReques $request
      * @return mixed
      */
-    public function getMovieDetail(Request $request)
+    public function getMovieDetail(MovieIdReques $request)
     {
-        if ($request->movieId === null) {
-            return response()->json(['error' => 400, 'message' => 'movieId is required params'], 400);
-        }
-
         $movie = Movie::where('id', (integer)$request->movieId)->first();
 
         if ($movie === null) {
@@ -182,15 +163,11 @@ class Api extends Controller
 
     /**
      * Метод возвращает список сеансов по id фильма
-     * @param Request $request
+     * @param SeanceRequest $request
      * @return array
      */
-    public function getSeances(Request $request)
+    public function getSeances(SeanceRequest $request)
     {
-        if ($request->code === null || $request->movieId === null) {
-            return response()->json(['error' => 400, 'message' => 'code and movieId is required params'], 400);
-        }
-
         $key = config('app.key_kinohod');
         $url = "https://api.kinohod.ru/api/data/2/$key/city/" . $request->code . '/seances.json?movieId=' . $request->movieId . '&_fields=id,hallId,startTime,languageId,subtitleId,groupName,time,formats,minPrice,maxPrice,date,cinemaId';
 
@@ -209,5 +186,42 @@ class Api extends Controller
         }
 
         return json_decode($response->content);
+    }
+
+    /**
+     * Метод подтягивает кинотеатров городов и перезаписывает их в базу
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     */
+    public function getCinemaList()
+    {
+        $key = config('app.key_kinohod');
+        $url = "https://api.kinohod.ru/api/data/2/$key/cinemas.json";
+
+        $response = Curl::to($url);
+
+        // если нужен прокси
+        if (config('app.proxy')) {
+            $response = $response->withProxy(config('app.proxy_url'), config('app.proxy_port'), config('app.proxy_type'), config('app.proxy_username'), config('app.proxy_password'));
+        }
+
+        $response = $response->returnResponseObject()->get();
+
+        if ($response->status !== 200) {
+            return response()->json(['error' => $response->status], $response->status);
+        }
+
+        Cinema::truncate();
+
+        $cinemas = json_decode(gzdecode($response->content));
+
+        foreach ($cinemas as $cinemaObj) {
+            $cinema = new Cinema;
+            foreach ($cinemaObj as $key => $item) {
+                $cinema->{$key} = $cinemaObj->{$key};
+            }
+            $cinema->save();
+        }
+
+        return response('OK', 200);
     }
 }
