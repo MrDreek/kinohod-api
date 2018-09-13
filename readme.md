@@ -2,11 +2,11 @@
 
 **_git clone git@github.com:MrDreek/kinohod-api.git_**
 
+**_composer install --no-dev_** установка зависимостей без require-dev
+
 **_php -r "file_exists('.env') || copy('.env.example', '.env');"_**
 
 **_php artisan key:generate_**
-
-**_composer install --no-dev_** установка зависимостей без require-dev
 
 Указать необходимоые данные в файле .env (Подключение к базе, настройки прокси, ключ кинохода)
 
@@ -39,6 +39,14 @@ POST _{host}/api/get-code_
 ```json
 {
     "code": 2
+}
+```
+
+Запрос без параметров:
+```json
+{
+    "error": 400,
+    "message": "name is required params"
 }
 ```
 
@@ -102,11 +110,18 @@ GET _{host}/api/get-movie-list/{code}
 ]
 ```
 
-GET _{host}/api/get-movie-detail/{id}
+POST _{host}/api/get-movie-detail/{id}
 
 `Вернёт подробную информацию о фильме по его Id`
 
 Обязательный параметр **{Id}** - это Id фильма сервиса Киноход
+
+Тело запроса:
+```json
+{
+	"movieId": 17676
+}
+```
 
 Результат:
 ```json
@@ -170,12 +185,20 @@ GET _{host}/api/get-movie-detail/{id}
 }
 ```
 
-GET _{host}/api/get-seances/{code}/{movieId}
+POST _{host}/api/get-seances/{code}/{movieId}
 
 `Вернёт все сеансы в городе по обпределённому фильму`
 
 Обязательный параметр **{code}** - это код города из сервиса Киноход
 Обязательный параметр **{movieId}** - это id фильма сервиса Киноход
+
+Тело запроса:
+```json
+{
+	"code": 2,
+	"movieId": 17676
+}
+```
 
 Результат:
 ```json
@@ -214,6 +237,3 @@ GET _{host}/api/get-seances/{code}/{movieId}
    }
 ]
 ```
-
-
-

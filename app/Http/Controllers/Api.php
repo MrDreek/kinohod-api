@@ -50,51 +50,19 @@ class Api extends Controller
      * @param Request $request
      * @return array
      */
-    public function getCode(Request $request): array
+    public function getCode(Request $request)
     {
-        $city = City::where('title', 'like', '%' . $request->input('name') . '%')->firstOrFail();
-        return ['code' => $city->code];
-    }
-
-    /**
-     * Метод возвращает список фильмов с краткой ифнормацие по коду города
-     * @param $code
-     * @return array
-     */
-    public function getMovieListByCode($code): array
-    {
-        $key = config('app.key_kinohod');
-        $url = "https://api.kinohod.ru/api/data/2/$key/city/$code/running/week.json";
-
-        $response = Curl::to($url);
-
-        // если нужен прокси
-        if (config('app.proxy')) {
-            $response = $response->withProxy(config('app.proxy_url'), config('app.proxy_port'), config('app.proxy_type'), config('app.proxy_username'), config('app.proxy_password'));
+        if ($request->name === null) {
+            return response()->json(['error' => 400, 'message' => 'name is required params'], 400);
         }
 
-        $response = $response->get();
+        $city = City::where('title', 'like', '%' . $request->name . '%')->first();
 
-        $moviesJson = json_decode(gzdecode($response));
-
-        $movies = [];
-
-        foreach ($moviesJson as $movieJson) {
-            $movies[] = [
-                'id' => $movieJson->id,
-                'originalTitle' => $movieJson->originalTitle,
-                'annotationFull' => $movieJson->annotationFull,
-                'genres' => $movieJson->genres,
-                'countries' => $movieJson->countries,
-                'productionYear' => $movieJson->productionYear,
-                'title' => $movieJson->title,
-                'ageRestriction' => $movieJson->ageRestriction,
-                'annotationShort' => $movieJson->annotationShort,
-                'poster' => $movieJson->poster,
-            ];
+        if ($city === null) {
+            return response()->json(['error' => 404, 'message' => 'Not found'], 404);
         }
 
-        return $movies;
+        return $city->getCode();
     }
 
     /**
@@ -143,25 +111,18 @@ class Api extends Controller
     }
 
     /**
-     * Метод возвращает детальную информацию по id фильма
-     * @param $id
-     * @return mixed
-     */
-    public function getMovieDetail($id)
-    {
-        return Movie::where('id', '=', (integer)$id)->firstOrFail();
-    }
-
-    /**
-     * Метод возвращает список сеансов по id фильма
-     * @param $code
-     * @param $movieId
+     * Метод возвращает список фильмов с краткой ифнормацие по коду города
+     * @param Request $request
      * @return array
      */
-    public function getSeances($code, $movieId)
+    public function getMovieListByCode(Request $request)
     {
         $key = config('app.key_kinohod');
-        $url = "https://api.kinohod.ru/api/data/2/$key/city/$code/seances.json?movieId=$movieId";
+
+        if ($request->code === null) {
+            return response()->json(['error' => 400, 'message' => 'code is required params'], 400);
+        }
+        $url = "https://api.kinohod.ru/api/data/2/$key/city/" . $request->code . '/running/week.json';
 
         $response = Curl::to($url);
 
@@ -170,29 +131,83 @@ class Api extends Controller
             $response = $response->withProxy(config('app.proxy_url'), config('app.proxy_port'), config('app.proxy_type'), config('app.proxy_username'), config('app.proxy_password'));
         }
 
-        $response = $response->get();
+        $response = $response->returnResponseObject()->get();
 
-        $seancesJson = json_decode($response);
+        if ($response->status !== 200) {
+            return response()->json(['error' => $response->status], $response->status);
+        }
 
-        $seances = [];
+        $moviesJson = json_decode(gzdecode($response->content));
 
-        foreach ($seancesJson as $seanceJson) {
-            $seances[] = [
-                'id' => $seanceJson->id,
-                'hallId' => $seanceJson->hallId,
-                'startTime' => $seanceJson->startTime,
-                'languageId' => $seanceJson->languageId,
-                'subtitleId' => $seanceJson->subtitleId,
-                'groupName' => $seanceJson->groupName,
-                'time' => $seanceJson->time,
-                'formats' => $seanceJson->formats,
-                'minPrice' => $seanceJson->minPrice,
-                'maxPrice' => $seanceJson->maxPrice,
-                'date' => $seanceJson->date,
-                'cinemaId' => $seanceJson->cinemaId,
+        $movies = [];
+
+        foreach ($moviesJson as $movieJson) {
+            $movies[] = [
+                'id' => $movieJson->id,
+                'originalTitle' => $movieJson->originalTitle ?? null,
+                'annotationFull' => $movieJson->annotationFull ?? null,
+                'genres' => $movieJson->genres ?? null,
+                'countries' => $movieJson->countries ?? null,
+                'productionYear' => $movieJson->productionYear ?? null,
+                'title' => $movieJson->title ?? null,
+                'ageRestriction' => $movieJson->ageRestriction ?? null,
+                'annotationShort' => $movieJson->annotationShort ?? null,
+                'poster' => $movieJson->poster ?? null,
+                'imdbId' => $movieJson->imdbId ?? null,
             ];
         }
 
-        return $seances;
+        return $movies;
+    }
+
+    /**
+     * Метод возвращает детальную информацию по id фильма | не используется
+     * @param Request $request
+     * @return mixed
+     */
+    public function getMovieDetail(Request $request)
+    {
+        if ($request->movieId === null) {
+            return response()->json(['error' => 400, 'message' => 'movieId is required params'], 400);
+        }
+
+        $movie = Movie::where('id', (integer)$request->movieId)->first();
+
+        if ($movie === null) {
+            return response()->json(['error' => 404, 'message' => 'Not found'], 404);
+        }
+
+        return $movie;
+    }
+
+    /**
+     * Метод возвращает список сеансов по id фильма
+     * @param Request $request
+     * @return array
+     */
+    public function getSeances(Request $request)
+    {
+        if ($request->code === null || $request->movieId === null) {
+            return response()->json(['error' => 400, 'message' => 'code and movieId is required params'], 400);
+        }
+
+        $key = config('app.key_kinohod');
+        $url = "https://api.kinohod.ru/api/data/2/$key/city/" . $request->code . '/seances.json?movieId=' . $request->movieId . '&_fields=id,hallId,startTime,languageId,subtitleId,groupName,time,formats,minPrice,maxPrice,date,cinemaId';
+
+        $response = Curl::to($url);
+
+        // если нужен прокси
+        if (config('app.proxy')) {
+            $response = $response->withProxy(config('app.proxy_url'), config('app.proxy_port'), config('app.proxy_type'), config('app.proxy_username'), config('app.proxy_password'));
+        }
+
+        $response = $response->returnResponseObject()->get();
+
+
+        if ($response->status !== 200) {
+            return response()->json(['error' => $response->status], $response->status);
+        }
+
+        return json_decode($response->content);
     }
 }
