@@ -30,19 +30,13 @@ class Api extends Controller
             $response = $response->withProxy(config('app.proxy_url'), config('app.proxy_port'), config('app.proxy_type'), config('app.proxy_username'), config('app.proxy_password'));
         }
 
-        $response = $response->get();
-
-        $cities = json_decode(gzdecode($response));
-
         City::truncate();
 
-        foreach ($cities as $cityObj) {
+        foreach (json_decode(gzdecode($response->get())) as $city) {
             $city = new City;
-            $city->utcOffset = $cityObj->utcOffset;
-            $city->title = $cityObj->title;
-            $city->code = $cityObj->id;
-            $city->alias = $cityObj->alias;
-            $city->location = $cityObj->location;
+            foreach ($city as $key => $item) {
+                $city->{$key} = $item;
+            }
             $city->save();
         }
 
@@ -81,16 +75,12 @@ class Api extends Controller
             $response = $response->withProxy(config('app.proxy_url'), config('app.proxy_port'), config('app.proxy_type'), config('app.proxy_username'), config('app.proxy_password'));
         }
 
-        $response = $response->get();
-
-        $moviesJson = json_decode(gzdecode($response));
-
         Movie::truncate();
 
-        foreach ($moviesJson as $moviesObj) {
+        foreach (json_decode(gzdecode($response->get())) as $movies) {
             $movie = new Movie;
-            foreach ($moviesObj as $key => $item) {
-                $movie->{$key} = $moviesObj->{$key};
+            foreach ($movies as $key => $item) {
+                $movie->{$key} = $item;
             }
             $movie->save();
         }
@@ -122,23 +112,21 @@ class Api extends Controller
             return response()->json(['error' => $response->status], $response->status);
         }
 
-        $moviesJson = json_decode(gzdecode($response->content));
-
         $movies = [];
 
-        foreach ($moviesJson as $movieJson) {
+        foreach (json_decode(gzdecode($response->content)) as $movie) {
             $movies[] = [
-                'id' => $movieJson->id,
-                'originalTitle' => $movieJson->originalTitle ?? null,
-                'annotationFull' => $movieJson->annotationFull ?? null,
-                'genres' => $movieJson->genres ?? null,
-                'countries' => $movieJson->countries ?? null,
-                'productionYear' => $movieJson->productionYear ?? null,
-                'title' => $movieJson->title ?? null,
-                'ageRestriction' => $movieJson->ageRestriction ?? null,
-                'annotationShort' => $movieJson->annotationShort ?? null,
-                'poster' => $movieJson->poster ?? null,
-                'imdbId' => $movieJson->imdbId ?? null,
+                'id' => $movie->id,
+                'originalTitle' => $movie->originalTitle ?? null,
+                'annotationFull' => $movie->annotationFull ?? null,
+                'genres' => $movie->genres ?? null,
+                'countries' => $movie->countries ?? null,
+                'productionYear' => $movie->productionYear ?? null,
+                'title' => $movie->title ?? null,
+                'ageRestriction' => $movie->ageRestriction ?? null,
+                'annotationShort' => $movie->annotationShort ?? null,
+                'poster' => $movie->poster ?? null,
+                'imdbId' => $movie->imdbId ?? null,
             ];
         }
 
@@ -180,7 +168,6 @@ class Api extends Controller
 
         $response = $response->returnResponseObject()->get();
 
-
         if ($response->status !== 200) {
             return response()->json(['error' => $response->status], $response->status);
         }
@@ -212,12 +199,10 @@ class Api extends Controller
 
         Cinema::truncate();
 
-        $cinemas = json_decode(gzdecode($response->content));
-
-        foreach ($cinemas as $cinemaObj) {
+        foreach (json_decode(gzdecode($response->content)) as $cinema) {
             $cinema = new Cinema;
-            foreach ($cinemaObj as $key => $item) {
-                $cinema->{$key} = $cinemaObj->{$key};
+            foreach ($cinema as $key => $item) {
+                $cinema->{$key} = $item;
             }
             $cinema->save();
         }
