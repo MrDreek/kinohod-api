@@ -83,7 +83,8 @@ GET _{host}/api/get-movie-list/{code}
       "poster":{  
          "rgb":"d96633",
          "name":"b9ed7923-7269-4de8-b9ce-264e076971ef.jpg"
-      }
+      },
+      "imdbId": "7886614"
    },
    {  
       "id":12096,
@@ -105,7 +106,8 @@ GET _{host}/api/get-movie-list/{code}
       "poster":{  
          "rgb":"807e79",
          "name":"8334f41c-7d2a-4a76-a4a8-98bd4ebe8d86.jpg"
-      }
+      },
+      "imdbId": null
    }
 ]
 ```
